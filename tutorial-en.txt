@@ -1,0 +1,419 @@
+Kata 2 : Prime Factors
+
+In this part of tutorial, we'll dig into a pretty basic challenge named "Prime Factor" which is the first kata released by Uncle Bob.
+If you're new, you can check my last post regarding Introducution of code Kat and solving our first kata. so, suit up and let's get started.
+
+"Prime Number"
+
+Am pretty much sure you already know what these two word means but let guess its your first day on the earth ;) !
+
+A prime number is a number that is only divisible by 1 (of course) and itself. That's it!
+As far as we can remember, prime number appear at irregular time interval and are the fondments of algebrical mathematics. They are very powerful, and use in cryptography. You might have once heard about RSA Algorithm, well the key of this powerful allgotithm is prime numbers.
+
+"Our Mission"
+
+Today, we'll create a program that factorise a positive number into its prime factors through Test-Driven-Development using phpspec. Very cool huh! doesn't it?
+
+so let present an example :
+
+0	->	[]
+1	->	[]
+2	->	[2]
+3	->	[3]
+4	->	[2,2]
+6	->	[2,3]
+9	->	[3,3]
+12	->	[2,2,3]
+13	->	[13]
+15	->	[3,5]
+100	->	[2,2,5,5]
+-10	->	"The program only allows positive numbers"
+
+Can we acheive that kind of program? A least we can try! So ready?
+
+Setup our project
+
+	Composer & phpspecs
+
+Create a new folder and jump in.
+mkdir prime-factors && cd prime-factors
+
+Then run composer to require phppec by choosing the latest version when composer asks you
+composer require phpspec/phpspec
+
+All this stuff done, you can create your spec file by running 
+./vendor/bin/phpspec describe PrimeFactors
+
+This command will create the folders src and spec respectivelly for your source files and your tests files. After that your can edit your composer.json file and add the autoload param allowing composer to load your classes in the src folder for you, with or not a namespace.
+
+Add this line to your composer file.
+//////
+
+Well, I think it's time to start coding. You can type phpspec run to fire your first test (the one that comes with phpspec describe) and see it fail because the class PrimeFactor doesn't exist so phpspec want to create it for you. Don't be mean and let him create it on your behalf :).
+
+Then run the command again and great!
+
+Now we take the ride, lets go!
+
+First (or second :)), we want to have a function called "apply" to return an empty array when we pass 1 as entry parameter. So how do we do that?
+
+Huh we open our PrimeFactor class and ad... :(
+
+wrong answer!
+
+if you want to do things better and have an elegant code you probably won't take that way! Remember earlier in this tutorial, I mentioned TDD. In Test-Driven-Development (TDD) we are only allowed to implement code after written test. As we are good developers, we ae going to write the test first watch it fail and only after that mplement the simplest code that make the test green and refactor the code. action is worth 1000 words.
+Baby steps
+
+in PRimeFactorSpec file add your test funtion and run phpspec.
+
+function it_returns_an_empty_array_for_1()
+{
+	$this->generate(1)->shouldBe([]);
+}
+
+Then
+./vendor/bin/phpspec run
+
+Now I can let you play with the PrimeFactor class!
+The test wants an empty array so we obey and give it an empty array.
+class PrimeFactors
+{
+    public function apply($number)
+    {
+    	return [];
+    }
+}
+
+And great! we have the green color back...
+
+Next we want that function to return 2 when we pass it 2.
+The test for this may look like :
+function it_returns_2_for_2()
+{
+	$this->generate(2)->shouldBe([2]);
+}
+
+now how do we implement this?
+a simple way to pass the test can be by adding a condition to check if the number is equal 2 then return 2 othrwise we return the empty array added in the last test.
+
+class PrimeFactor
+{
+    public function apply($number)
+    {
+    	if ( $number == 2 ) {
+    		return [2];
+    	}
+    	return [];
+    }
+}
+
+Well done! once again our code work!
+
+Now what should happen when we give that function the number 4. let calculate manually :). 2 divide 4 so 4 / 2 will give us 2 then we conclude our function will return [2,2] because 4 = 2 * 2.
+
+Our test function will then be :
+function it_returns_2_2_for_4()
+{
+	$this->generate(4)->shouldBe([2,2]);
+}
+
+We just want our green color back so let write the simplest code in our mind. One way could be to add a new condition and check if number match 4 then we return [2,2].
+class PrimeFactor
+{
+    public function apply($number)
+    {
+    	if ( $number == 2 ) {
+    		return [2];
+    	}
+
+    	if ( $number == 4 ) {
+    		return [2,2];
+    	}
+    	return [];
+    }
+}
+
+And again bravo! But I think it might be time to do a bit refactoring.
+
+Instead of always add a return key, we can declare a result variable with an empty array at the beginning of the function and in each condition we affect the corresponding value. Let try it.
+class PrimeFactor
+{
+    public function apply($number)
+    {
+    	$result = [];
+    	if ( $number == 2 ) {
+    		$result[] = 2;
+    	}
+
+    	if ( $number == 4 ) {
+    		$result = [2,2];
+    	}
+    	return $result;
+    }
+}
+We test to make sure we didn't break anything.And we're good so let go further in refactoring.
+
+How do we know wether a number can be divide by 2 or not? the answer is modulo (%). if a number is divisible by 2 then the left over of that number modulo 2 should be 0. Let run an example, if 4 is divisible by 2 then 4 % 2 = 0. Got it!
+
+In our case, we check if the number is greater than 1 then we iterate over a while loop until the number is no longer divisible by 2. in the loop we push 2 in our result variable. After that we do a normal dividion of the number by 2 (ex: 4/2) and affect the result to the variable number. So at the next iteratation the number will be decremented.
+And here is how I've implemented that.
+class PrimeFactor
+{
+    public function apply($number)
+    {
+    	$result = [];
+
+    	if ($number > 1)
+    	{
+			while ( $number % 2 == 0 )
+			{
+				$result[] = 2;
+				$number /= 2;
+			}
+    	}
+
+    	return $result;
+    }
+}
+
+Much better and very simple! you can refactor again if you want.
+
+What now? Well we want the prime factor of the number 6 therefor the return should be [2,3]. Right lets go!
+function it_returns_2_3_for_6()
+{
+	$this->generate(6)->shouldBe([2,3]);
+}
+
+Very easy to acheive, we only have to duplicate the while loop but this time we make the modulo of the number with 3.
+class PrimeFactor
+{
+    public function apply($number)
+    {
+    	$result = [];
+
+    	if ($number > 1)
+    	{
+			while ( $number % 2 == 0 )
+			{
+				$result[] = 2;
+				$number /= 2;
+			}
+			while ( $number % 3 == 0 )
+			{
+				$result[] = 3;
+				$number /= 3;
+			}
+    	}
+
+    	return $result;
+    }
+}
+
+Great work guys! now let move we the number 9 case and see if it works! 
+function it_returns_3_3_for_9()
+{
+	$this->generate(9)->shouldBe([3,3]);
+}
+
+Run phpspec and this time you notice our test pass without editing the code. Nice we can now add test for the number 10.
+function it_returns_2_5_for_10()
+{
+	$this->generate(10)->shouldBe([2,5]);
+}
+
+:) it fails so that means we have a code to implement!!!
+The simplest way is to add a new while for 5 number. Let see.
+class PrimeFactor
+{
+    public function apply($number)
+    {
+    	$result = [];
+
+    	if ($number > 1)
+    	{
+			while ( $number % 2 == 0 )
+			{
+				$result[] = 2;
+				$number /= 2;
+			}
+			while ( $number % 3 == 0 )
+			{
+				$result[] = 3;
+				$number /= 3;
+			}
+			while ( $number % 5 == 0 )
+			{
+				$result[] = 5;
+				$number /= 5;
+			}
+    	}
+
+    	return $result;
+    }
+}
+
+We're starting to understand TDD philosophy, don't we? So the next thing could be refactoring before jumping into another test. don't you think so?
+
+First thing, we can extract the modulo divider number to a variable, then we transform the if condition to a while and increment the dividder variable of 1 at the end of the loop. This will allow us to have to reduce the loops number to 1. Let see the result.
+class PrimeFactor
+{
+    public function apply($number)
+    {
+    	$result = [];
+    	$divider = 2;
+
+    	while ($number > 1)
+    	{
+			while ( $number % $divider == 0 )
+			{
+				$result[] = $divider;
+				$number /= $divider;
+			}
+			$divider += 1;
+    	}
+
+    	return $result;
+    }
+}
+
+Run and it pass! great job we're dnne here!
+
+Our code is finish but can be refactor (This can be a good exercice). We'll add test for 12, 13, 15, 50, 100 at once and the code shoukd handle them.
+function it_returns_2_2_3_for_12()
+{
+	$this->generate(12)->shouldBe([2,2,3]);
+}
+
+function it_returns_13_for_13()
+{
+	$this->generate(13)->shouldBe([13]);
+}
+
+function it_returns_3_5_for_15()
+{
+	$this->generate(15)->shouldBe([3,5]);
+}
+
+function it_returns_5_5_for_25()
+{
+	$this->generate(25)->shouldBe([5,5]);
+}
+
+function it_returns_2_5_5_for_50()
+{
+	$this->generate(50)->shouldBe([2,5,5]);
+}
+
+function it_returns_2_2_5_5_for_100()
+{
+	$this->generate(100)->shouldBe([2,2,5,5]);
+}
+
+We run phpspec and once again The green lantern...
+
+Let resume. We required phpspec in our project with composer, we describe the spec for our PrimeFactor class and made our class pass some test for given numbers. and if you've been following the whole time, then you classes should look like these :
+spec/PrimeFactorSpec.php
+--------
+<?php
+
+namespace spec;
+
+use PhpSpec\ObjectBehavior;
+use Prophecy\Argument;
+
+class PrimeFactorsSpec extends ObjectBehavior
+{
+    function it_is_initializable()
+    {
+        $this->shouldHaveType('PrimeFactors');
+    }
+
+    function it_returns_an_empty_array_for_1()
+    {
+    	$this->generate(1)->shouldBe([]);
+    }
+
+    function it_returns_2_for_4()
+    {
+    	$this->generate(2)->shouldBe([2]);
+    }
+
+    function it_returns_2_2_for_4()
+    {
+    	$this->generate(4)->shouldBe([2,2]);
+    }
+
+    function it_returns_2_2_for_6()
+    {
+    	$this->generate(6)->shouldBe([2,3]);
+    }
+
+    function it_returns_3_3_for_9()
+    {
+    	$this->generate(9)->shouldBe([3,3]);
+    }
+
+    function it_returns_2_5_for_10()
+    {
+    	$this->generate(10)->shouldBe([2,5]);
+    }
+
+    function it_returns_2_2_3_for_12()
+    {
+    	$this->generate(12)->shouldBe([2,2,3]);
+    }
+
+    function it_returns_13_for_13()
+    {
+    	$this->generate(13)->shouldBe([13]);
+    }
+
+    function it_returns_3_5_for_15()
+    {
+    	$this->generate(15)->shouldBe([3,5]);
+    }
+
+    function it_returns_5_5_for_25()
+    {
+    	$this->generate(25)->shouldBe([5,5]);
+    }
+
+    function it_returns_2_5_5_for_50()
+    {
+    	$this->generate(50)->shouldBe([2,5,5]);
+    }
+
+    function it_returns_2_2_5_5_for_100()
+    {
+    	$this->generate(100)->shouldBe([2,2,5,5]);
+    }
+
+}
+
+src/PrimeFactor.php
+-------
+<?php
+
+class PrimeFactors
+{
+    public function generate($number)
+    {
+    	$result = [];
+    	$divider = 2;
+
+    	while ($number > 1)
+    	{
+			while ( $number % $divider == 0 )
+			{
+				$result[] = $divider;
+				$number /= $divider;
+			}
+			$divider +=1;
+    	}
+
+    	return $result;
+    }
+}
+
+
+I hope this has been informative to you and looking forward to see you in the next tutorial. Thank you for viewing.
